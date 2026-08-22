@@ -1,0 +1,172 @@
+generated: '2026-08-22'
+method: probed
+source: https://glowbar.com/.well-known/ucp + https://glowbar.com/.well-known/openid-configuration + mcp/glowbar-mcp-tools.json
+note: >-
+  Every entry below is asserted from a machine-readable document actually fetched from a
+  Glowbar host on 2026-08-22, not from a marketing claim. Glowbar publishes no compliance
+  programme, no certifications and no trust center of its own; the storefront's legal and
+  security posture is the Shopify platform's, and that is recorded honestly as not-Glowbar
+  rather than credited to Glowbar.
+standards:
+- id: ucp
+  name: Universal Commerce Protocol
+  version: '2026-04-08'
+  conforms: true
+  domain_standard: true
+  market: retail / direct-to-consumer commerce
+  evidence:
+    location: https://glowbar.com/.well-known/ucp
+    http_status: 200
+    declaration: >-
+      The merchant profile declares ucp.version "2026-04-08", supported_versions
+      {2026-04-08, 2026-01-23}, a dev.ucp.shopping service with transport "mcp" and a
+      concrete endpoint, and seven dev.ucp.shopping.* capability declarations each carrying
+      a spec URI and a JSON Schema URI on ucp.dev.
+  note: >-
+    This is the domain-standard signature for this provider's market. An agent that already
+    speaks UCP can search Glowbar's catalog, build a cart and drive a checkout with no
+    bespoke connector. The declaration is in the contract, not in prose.
+- id: ucp-shopping-catalog
+  name: UCP Shopping — Catalog (search + lookup)
+  version: '2026-04-08'
+  conforms: true
+  evidence:
+    location: https://glowbar.com/.well-known/ucp -> capabilities.dev.ucp.shopping.catalog.search / .catalog.lookup
+    schema: https://ucp.dev/2026-04-08/schemas/shopping/catalog_search.json
+- id: ucp-shopping-cart
+  name: UCP Shopping — Cart
+  version: '2026-04-08'
+  conforms: true
+  evidence:
+    location: https://glowbar.com/.well-known/ucp -> capabilities.dev.ucp.shopping.cart
+    tools: [create_cart, get_cart, update_cart, cancel_cart]
+- id: ucp-shopping-checkout
+  name: UCP Shopping — Checkout
+  version: '2026-04-08'
+  conforms: true
+  evidence:
+    location: https://glowbar.com/.well-known/ucp -> capabilities.dev.ucp.shopping.checkout
+    tools: [create_checkout, get_checkout, update_checkout, complete_checkout, cancel_checkout]
+- id: ucp-shopping-fulfillment
+  name: UCP Shopping — Fulfillment
+  version: '2026-04-08'
+  conforms: true
+  evidence:
+    location: https://glowbar.com/.well-known/ucp -> capabilities.dev.ucp.shopping.fulfillment
+    config: 'allows_multi_destination.shipping=false; allows_method_combinations=[[shipping]]'
+- id: ucp-shopping-discount
+  name: UCP Shopping — Discount
+  version: '2026-04-08'
+  conforms: true
+  evidence:
+    location: https://glowbar.com/.well-known/ucp -> capabilities.dev.ucp.shopping.discount
+- id: ucp-shopping-order
+  name: UCP Shopping — Order
+  version: '2026-04-08'
+  conforms: true
+  evidence:
+    location: https://glowbar.com/.well-known/ucp -> capabilities.dev.ucp.shopping.order
+    tools: [get_order]
+- id: shopify-catalog-extension
+  name: dev.shopify.catalog (UCP catalog extension)
+  version: '2026-04-08'
+  conforms: true
+  evidence:
+    location: https://glowbar.com/.well-known/ucp -> capabilities.dev.shopify.catalog
+    schema: https://shopify.dev/ucp/schemas/2026-04-08/shopify_catalog.json
+- id: mcp
+  name: Model Context Protocol
+  conforms: true
+  evidence:
+    location: https://glowbar.com/api/ucp/mcp
+    http_status: 200
+    declaration: Anonymous tools/list returns a JSON-RPC 2.0 result with 13 tools, each carrying name, description and inputSchema.
+- id: jsonrpc-2.0
+  name: JSON-RPC 2.0
+  conforms: true
+  evidence:
+    location: https://glowbar.com/api/ucp/mcp
+    declaration: Responses carry {"jsonrpc":"2.0","id":...} with either result or a typed error object; an unknown method returned error code -32001 with a data envelope.
+- id: json-schema-2020-12
+  name: JSON Schema draft 2020-12
+  conforms: true
+  evidence:
+    location: mcp/glowbar-mcp-tools.json
+    declaration: Every one of the 13 tool inputSchemas declares $schema https://json-schema.org/draft/2020-12/schema.
+- id: oauth2
+  name: OAuth 2.0 (RFC 6749) + PKCE (RFC 7636)
+  conforms: true
+  evidence:
+    location: https://glowbar.com/.well-known/oauth-authorization-server
+    http_status: 200
+    declaration: 'grant_types_supported [authorization_code, refresh_token, jwt-bearer]; code_challenge_methods_supported [S256].'
+- id: rfc8414
+  name: OAuth 2.0 Authorization Server Metadata (RFC 8414)
+  conforms: true
+  evidence:
+    location: https://glowbar.com/.well-known/oauth-authorization-server
+    http_status: 200
+- id: rfc9728
+  name: OAuth 2.0 Protected Resource Metadata (RFC 9728)
+  conforms: true
+  evidence:
+    location: https://glowbar.com/.well-known/oauth-protected-resource
+    http_status: 200
+    declaration: '{"resource":"https://glowbar.com","authorization_servers":[...],"bearer_methods_supported":["header"]}'
+- id: oidc
+  name: OpenID Connect Discovery 1.0
+  conforms: true
+  evidence:
+    location: https://glowbar.com/.well-known/openid-configuration
+    http_status: 200
+    declaration: 'issuer, authorization_endpoint, token_endpoint, jwks_uri, id_token_signing_alg_values_supported [RS256], claims_supported.'
+- id: iso4217
+  name: ISO 4217 currency codes (minor units)
+  conforms: true
+  evidence:
+    location: mcp/glowbar-mcp-tools.json
+    declaration: 'Tool descriptions specify money as {"amount": <integer minor units>, "currency": <ISO 4217 code>}.'
+- id: llmstxt
+  name: llms.txt
+  conforms: true
+  evidence:
+    location: https://glowbar.com/llms.txt
+    http_status: 200
+- id: sitemaps-0.9
+  name: sitemaps.org 0.9
+  conforms: true
+  evidence:
+    location: https://glowbar.com/sitemap.xml
+    http_status: 200
+    declaration: Includes a dedicated /sitemap_agentic_discovery.xml naming /agents.md.
+- id: rfc9457
+  name: RFC 9457 Problem Details
+  conforms: false
+  evidence:
+    location: https://glowbar.com/api/ucp/mcp
+    declaration: Errors use the JSON-RPC 2.0 error envelope, not application/problem+json. No problem+json content type was observed.
+- id: a2a
+  name: A2A Agent Card
+  conforms: false
+  evidence:
+    location: https://glowbar.com/.well-known/agent-card.json
+    http_status: 404
+    declaration: Neither /.well-known/agent-card.json nor the legacy /.well-known/agent.json is served on any Glowbar host.
+- id: rfc9116
+  name: RFC 9116 security.txt
+  conforms: false
+  evidence:
+    location: https://glowbar.com/.well-known/security.txt
+    http_status: 404
+- id: rfc9727
+  name: RFC 9727 api-catalog
+  conforms: false
+  evidence:
+    location: https://glowbar.com/.well-known/api-catalog
+    http_status: 404
+compliance_programs: []
+compliance_note: >-
+  Glowbar publishes no certifications (no SOC 2, ISO 27001, PCI DSS or HIPAA claim), no trust
+  center and no compliance page. probe-security-programs.py returned vdp=none trust=none. No
+  Compliance or TrustCenter pointer is emitted, because asserting one would credit Glowbar
+  with a programme it does not publish.

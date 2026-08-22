@@ -1,0 +1,86 @@
+generated: '2026-08-22'
+method: probed
+source: live POST probes of https://glowbar.com/api/ucp/mcp
+note: >-
+  Glowbar publishes no error reference page and no OpenAPI, so there are no 4xx/5xx response
+  objects to derive from. The entries below were observed on live, read-only, unauthenticated
+  probes of the MCP endpoint on 2026-08-22, or are the JSON-RPC 2.0 standard codes the endpoint
+  declares conformance to. Nothing here is invented: every entry is marked with how it was
+  established.
+format: jsonrpc-2.0
+rfc9457: false
+envelope:
+  shape: '{"jsonrpc":"2.0","id":<id>,"error":{"code":<int>,"message":<string>,"data":{...}}}'
+  data_fields:
+  - name: code
+    description: 'A machine-readable slug narrowing the JSON-RPC code (observed value: invalid_profile_url).'
+  - name: content
+    description: A human-readable explanation of the failure.
+  - name: continue_url
+    description: "A URL an agent can hand to a human to continue out-of-band (observed value: the store's canonical myshopify URL)."
+  transport_status_observed: 422
+  trace_header: x-request-id
+problem_types:
+- id: invalid_profile_url
+  jsonrpc_code: -32001
+  http_status: 422
+  title: UCP discovery failed
+  detail: 'Unable to fetch agent profile: Missing profile uri'
+  cause: >-
+    The request omitted meta.ucp-agent.profile, or supplied a profile URI the store could not
+    dereference.
+  remediation: >-
+    Supply meta.ucp-agent.profile on every tools/call with a publicly fetchable agent profile
+    URI. Note that this error is returned for an unknown method name as well, so it can mask a
+    method typo.
+  method: probed
+  evidence:
+    url: https://glowbar.com/api/ucp/mcp
+    http_status: 422
+    observed: '2026-08-22'
+    request: '{"jsonrpc":"2.0","id":9,"method":"does_not_exist"}'
+- id: rate_limited
+  http_status: 429
+  title: Too Many Requests
+  detail: The MCP endpoint is rate-limited per IP.
+  cause: Exceeding the per-IP request rate on https://glowbar.com/api/ucp/mcp.
+  remediation: Back off on 429 responses.
+  method: searched
+  evidence:
+    url: https://glowbar.com/llms.txt
+    http_status: 200
+    quote: '**Respect rate limits.** The MCP endpoint is rate-limited per IP. Back off on 429 responses.'
+  note: Documented by the provider but not observed; no Retry-After header has been seen.
+- id: checkout_completion_error
+  title: Checkout completion error
+  detail: complete_checkout returns errors encountered during completion in its result payload.
+  cause: Payment declined, inventory unavailable, or buyer approval absent.
+  remediation: Read the errors returned in the complete_checkout result; do not retry without reusing the original meta.idempotency-key.
+  method: derived
+  evidence:
+    source: mcp/glowbar-mcp-tools.json -> tools[complete_checkout].description
+    quote: 'Returns details about the completed checkout, including order ID, Thank You Page URL, or any errors encountered.'
+  note: >-
+    The tool description confirms errors are returned in-band on the success path rather than as
+    a JSON-RPC error. The specific error values are not enumerated by the provider and are NOT
+    guessed here.
+standard_jsonrpc_codes:
+  note: >-
+    Declared by conformance to JSON-RPC 2.0 (see conformance/glowbar-conformance.yml). Listed for
+    completeness; only -32001 was observed on this endpoint.
+  codes:
+  - code: -32700
+    name: Parse error
+  - code: -32600
+    name: Invalid Request
+  - code: -32601
+    name: Method not found
+  - code: -32602
+    name: Invalid params
+  - code: -32603
+    name: Internal error
+error_count: 3
+gaps:
+- No published error reference, error code registry, or troubleshooting page on any Glowbar host.
+- No Retry-After or RateLimit-* headers observed on any response.
+- complete_checkout in-band error values are undocumented.

@@ -1,0 +1,68 @@
+generated: '2026-08-22'
+method: searched
+source: https://glowbar.com/pages/membership
+note: >-
+  Two different things are priced here and they must not be conflated. Glowbar's API/agent
+  surface has NO published plan, quota, meter or price — it is anonymous and free to call, and
+  no developer pricing page exists on any Glowbar host. What Glowbar does publish is consumer
+  service pricing, and that is what the tiers below are. Recorded separately so a reader is not
+  led to believe the membership fee buys API access.
+api_access:
+  plan_count: 0
+  metered: false
+  priced: false
+  signup_required: false
+  note: >-
+    https://glowbar.com/api/ucp/mcp answers tools/list anonymously with no account, key, quota or
+    charge. There is no developer plan page, no usage tier, and no commercial API product.
+  evidence:
+  - url: https://glowbar.com/api/ucp/mcp
+    http_status: 200
+consumer_plans:
+  plan_count: 3
+  currency: USD
+  source: https://glowbar.com/pages/membership
+  plans:
+  - name: The Membership
+    price: 65.00
+    currency: USD
+    period: month
+    included: 1 facial per month
+    benefits:
+    - 15% off all products
+    - 20% off Glowbar-branded items
+    - One complimentary guest visit annually
+    - 3-month voucher rollover
+    - Member loyalty rewards program
+    - Members-only events
+    commitment: 4-month minimum, then cancel or pause
+  - name: The Membership+
+    price: 120.00
+    currency: USD
+    period: month
+    included: 2 facials per month
+    benefits:
+    - 15% off all products
+    - 20% off Glowbar-branded items
+    - One complimentary guest visit annually
+    - 3-month voucher rollover
+    - Member loyalty rewards program
+    - Members-only events
+    commitment: 4-month minimum, then cancel or pause
+  - name: Student Membership
+    price: null
+    currency: USD
+    period: month
+    included: null
+    note: Referenced on the membership page as an available tier, but no price or terms are published.
+  non_member_rate:
+    price: 85.00
+    currency: USD
+    unit: per facial
+    note: Walk-in rate with no add-on fees; members pay $65 per facial.
+  retail:
+    channel: https://glowbar.com/collections/all
+    product_count: 30
+    price_range_usd: '10.00 - 195.00'
+    source: https://glowbar.com/products.json
+    http_status: 200

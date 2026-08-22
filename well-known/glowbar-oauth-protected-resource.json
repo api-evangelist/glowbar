@@ -1,0 +1,9 @@
+{
+    "resource": "https://glowbar.com",
+    "authorization_servers": [
+        "https://shopify.com/authentication/44884033689"
+    ],
+    "bearer_methods_supported": [
+        "header"
+    ]
+}

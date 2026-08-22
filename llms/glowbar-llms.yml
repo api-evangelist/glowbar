@@ -1,0 +1,27 @@
+generated: '2026-08-22'
+method: searched
+source: https://glowbar.com/llms.txt
+note: >-
+  Saved verbatim. Glowbar serves a real llms.txt (HTTP 200, text/markdown) that mirrors
+  /agents.md, which is itself listed in a dedicated /sitemap_agentic_discovery.xml. Both are
+  saved. Content is Shopify's agent-instruction template populated with Glowbar's store
+  identity, UCP endpoints and policy URLs. No llms-full.txt is published.
+files:
+- file: glowbar-llms.txt
+  url: https://glowbar.com/llms.txt
+  http_status: 200
+  content_type: text/markdown; charset=utf-8
+  bytes: 4268
+- file: glowbar-agents.md
+  url: https://glowbar.com/agents.md
+  http_status: 200
+  content_type: text/markdown; charset=utf-8
+  bytes: 4225
+  note: The canonical agent-facing document; llms.txt says it mirrors this file.
+discovery:
+- url: https://glowbar.com/sitemap_agentic_discovery.xml
+  http_status: 200
+  note: Dedicated sitemap whose only entry is /agents.md.
+- url: https://glowbar.com/robots.txt
+  http_status: 200
+  note: robots.txt header comments point agents at agents.md, /.well-known/ucp and /api/ucp/mcp.

@@ -1,0 +1,53 @@
+generated: '2026-08-22'
+method: searched
+source: https://glowbar.com/llms.txt
+note: >-
+  Glowbar documents that a rate limit exists but publishes no number, no window and no headers.
+  Live unauthenticated probes of https://glowbar.com/api/ucp/mcp on 2026-08-22 returned no
+  RateLimit-*, X-RateLimit-* or Retry-After header on either a 200 or a 422 response. The honest
+  finding is a documented-but-unquantified limit.
+limit_count: 0
+limits: []
+documented:
+  scope: per-ip
+  applies_to: https://glowbar.com/api/ucp/mcp
+  limit: null
+  window: null
+  burst: null
+  quote: '**Respect rate limits.** The MCP endpoint is rate-limited per IP. Back off on 429 responses.'
+  source: https://glowbar.com/llms.txt
+exhaustion:
+  status_code: 429
+  documented: true
+  observed: false
+  guidance: Back off on 429 responses.
+response_headers:
+  observed: []
+  probed:
+  - name: RateLimit-Limit
+    present: false
+  - name: RateLimit-Remaining
+    present: false
+  - name: RateLimit-Reset
+    present: false
+  - name: X-RateLimit-Limit
+    present: false
+  - name: Retry-After
+    present: false
+  note: >-
+    Headers actually present on the MCP responses are x-request-id and server-timing (which
+    carries processing/db durations, edge POP and country). Neither is a rate-limit signal.
+evidence:
+- url: https://glowbar.com/api/ucp/mcp
+  method: POST
+  http_status: 200
+  headers_checked: '2026-08-22'
+- url: https://glowbar.com/api/ucp/mcp
+  method: POST
+  http_status: 422
+  headers_checked: '2026-08-22'
+- url: https://glowbar.com/llms.txt
+  http_status: 200
+gaps:
+- No numeric limit, window or burst is published.
+- No runtime rate-limit headers are returned, so an agent cannot budget its calls and can only react to a 429 after the fact.

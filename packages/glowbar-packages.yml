@@ -1,0 +1,55 @@
+generated: '2026-08-22'
+method: searched
+source: registry.npmjs.org, pypi.org, rubygems.org, github.com/Glowbar
+note: >-
+  No first-party client library, SDK or CLI exists. Glowbar is a consumer skincare studio chain
+  with no developer program; its agent surface is platform-provided and is consumed by any
+  generic MCP client, so there is nothing for a Glowbar-authored SDK to wrap. Recorded as a
+  verified zero rather than omitted. No SDKs pointer is emitted.
+package_count: 0
+packages: []
+registries_probed:
+- registry: npm
+  query: glowbar
+  url: https://registry.npmjs.org/glowbar
+  http_status: 404
+  version: null
+- registry: npm
+  query: '@glowbar/sdk'
+  url: https://registry.npmjs.org/@glowbar/sdk
+  http_status: 404
+  version: null
+- registry: npm
+  query: glowbar-api
+  url: https://registry.npmjs.org/glowbar-api
+  http_status: 404
+  version: null
+- registry: pypi
+  query: glowbar
+  url: https://pypi.org/pypi/glowbar/json
+  http_status: 404
+  version: null
+- registry: rubygems
+  query: glowbar
+  url: https://rubygems.org/api/v1/gems/glowbar.json
+  http_status: 404
+  version: null
+source_repositories:
+- url: https://github.com/Glowbar
+  http_status: 200
+  public_repos: 0
+  created: '2021-02-03'
+  official: unverified
+  note: >-
+    A GitHub organization named "Glowbar" exists but publishes zero repositories and carries no
+    name, bio, website or any other field linking it to glowbar.com. Ownership could not be
+    established, so no GitHubOrganization pointer is emitted.
+related_but_not_first_party:
+- name: Shop skill
+  url: https://shop.app/SKILL.md
+  vendor: Shopify
+  official: false
+  note: >-
+    Glowbar's llms.txt, agents.md and robots.txt all recommend that shopping agents install
+    Shopify's Shop skill. It is Shopify's artifact distributed from shop.app, not Glowbar's,
+    and is recorded here only because the provider points at it.

@@ -1,0 +1,114 @@
+generated: '2026-08-22'
+method: derived
+source: mcp/glowbar-mcp-tools.json + https://glowbar.com/products.json
+note: >-
+  Derived from the JSON Schema 2020-12 input schemas of the 13 live MCP tools and from the shape
+  of the live storefront product JSON. There is no OpenAPI, so there are no $ref chains to walk;
+  relationships below are read from tool identifiers, nested schema objects, and the UCP
+  capability graph declared in /.well-known/ucp.
+identifier_scheme:
+  format: Shopify global object identifier
+  pattern: 'gid://shopify/{Type}/{id}'
+  example: 'gid://shopify/Checkout/abc123'
+  source: mcp/glowbar-mcp-tools.json -> tools[get_checkout].inputSchema.properties.id.description
+entities:
+- name: Product
+  description: A retail item in the Glowbar catalog.
+  accessed_by: [search_catalog, lookup_catalog, get_product]
+  http_representation: GET /products/{handle}.json
+  observed_fields: [id, title, handle, product_type, vendor, tags, variants, images, published_at, updated_at]
+  source: https://glowbar.com/products.json
+- name: Variant
+  description: A purchasable configuration of a Product, carrying its own price and inventory.
+  accessed_by: [lookup_catalog, get_product]
+  observed_fields: [id, title, price, sku, available]
+- name: Collection
+  description: A merchandising grouping of Products.
+  accessed_by: []
+  http_representation: GET /collections/{handle}/products.json
+  note: HTTP-only; no MCP tool exposes collections.
+- name: Cart
+  description: A mutable pre-purchase basket of line items.
+  accessed_by: [create_cart, get_cart, update_cart, cancel_cart]
+  capability: dev.ucp.shopping.cart
+- name: LineItem
+  description: A Variant plus quantity inside a Cart or Checkout.
+  accessed_by: [update_cart, update_checkout]
+- name: Checkout
+  description: A priced, address-bearing purchase in progress, including totals, discounts and taxes.
+  accessed_by: [create_checkout, get_checkout, update_checkout, complete_checkout, cancel_checkout]
+  capability: dev.ucp.shopping.checkout
+- name: Fulfillment
+  description: Shipping method and destination attached to a Checkout.
+  accessed_by: [update_checkout]
+  capability: dev.ucp.shopping.fulfillment
+  constraints:
+    multi_destination_shipping: false
+    method_combinations: [[shipping]]
+- name: Discount
+  description: A price reduction applied to a Cart or Checkout.
+  accessed_by: [get_checkout, update_checkout]
+  capability: dev.ucp.shopping.discount
+- name: Payment
+  description: A payment instrument and handler used to complete a Checkout.
+  accessed_by: [complete_checkout]
+  handlers: [com.google.pay, dev.shopify.card, dev.shopify.shop_pay]
+- name: Order
+  description: The immutable record produced by a completed Checkout.
+  accessed_by: [get_order]
+  capability: dev.ucp.shopping.order
+- name: Customer
+  description: A buyer identity in Shopify Customer Accounts, reachable only with an OAuth bearer token.
+  accessed_by: []
+  note: Not on the anonymous MCP surface; see authentication/ and scopes/.
+- name: Money
+  description: A value object, not an entity — an integer amount in ISO 4217 minor units plus a currency code.
+  shape: '{"amount": 2500, "currency": "USD"}'
+relationships:
+- from: Collection
+  to: Product
+  type: has_many
+  via: collection handle
+- from: Product
+  to: Variant
+  type: has_many
+  via: variants[]
+- from: Cart
+  to: LineItem
+  type: has_many
+  via: cart.items[]
+- from: LineItem
+  to: Variant
+  type: belongs_to
+  via: variant identifier
+- from: Checkout
+  to: Cart
+  type: belongs_to
+  via: checkout creation from a cart
+- from: Checkout
+  to: LineItem
+  type: has_many
+  via: checkout.items[]
+- from: Checkout
+  to: Fulfillment
+  type: has_one
+  via: checkout.fulfillment
+- from: Checkout
+  to: Discount
+  type: has_many
+  via: checkout.discounts[]
+- from: Checkout
+  to: Payment
+  type: has_one
+  via: checkout.payment
+- from: Order
+  to: Checkout
+  type: belongs_to
+  via: order id returned by complete_checkout
+- from: Order
+  to: Customer
+  type: belongs_to
+  via: buyer identity
+  note: Only observable with an authenticated Customer Account token.
+lifecycle_path: Product -> Cart -> Checkout -> Order
+render: null

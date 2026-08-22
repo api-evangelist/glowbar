@@ -1,0 +1,220 @@
+generated: '2026-08-22'
+method: probed
+source: mcp/glowbar-mcp-tools.json + https://glowbar.com/agents.md + https://glowbar.com/robots.txt + https://glowbar.com/policies/refund-policy
+note: >-
+  Derived from the 13 live MCP tool input schemas fetched from https://glowbar.com/api/ucp/mcp
+  on 2026-08-22, plus the store's own published agent rules. There is no OpenAPI, so every
+  convention below is read from a tool schema, a tool description, or a policy page — each
+  cited inline.
+auth_style:
+  summary: Anonymous discovery; agent-profile URI required on every call; buyer OAuth for account data.
+  detail: authentication/glowbar-authentication.yml
+  required_on_every_call: meta.ucp-agent.profile
+  failure_when_absent: HTTP 422, JSON-RPC error -32001, code invalid_profile_url
+
+idempotency:
+  supported: true
+  grade: verified
+  mechanism: idempotency key
+  header: null
+  field: meta.idempotency-key
+  scope: complete_checkout only
+  required: true
+  retention: null
+  retention_note: The provider states no retention or replay window for the key.
+  evidence:
+    source: mcp/glowbar-mcp-tools.json -> tools[complete_checkout].inputSchema.properties.meta
+    declaration: >-
+      "idempotency-key": {"type": "string", "description": "An idempotency key for completing
+      the checkout."} — and it appears in meta.required alongside "ucp-agent", so the schema
+      makes it MANDATORY, not optional.
+    verified: '2026-08-22'
+  note: >-
+    Idempotency is applied precisely where it matters and nowhere else: the single irreversible
+    financial operation in the tool set requires a key, and the twelve read/cart/checkout-draft
+    tools do not accept one. An agent that retries complete_checkout without reusing its key is
+    rejected by schema validation before it can double-charge a buyer.
+
+pagination:
+  style: cursor
+  applies_to: [search_catalog]
+  request_params:
+    cursor: catalog.pagination.cursor
+    limit: catalog.pagination.limit
+  limit_default: 10
+  limit_minimum: 1
+  limit_maximum: null
+  response_field: pagination.cursor
+  evidence:
+    source: mcp/glowbar-mcp-tools.json -> tools[search_catalog]
+    declaration: >-
+      "Results are paginated, with initial results limited to improve experience. Use the
+      pagination.cursor from the response to fetch additional pages when users request more
+      results."
+  note: lookup_catalog, get_product and every cart/checkout/order tool are single-object or by-identifier and declare no pagination.
+
+money:
+  representation: integer minor units paired with an ISO 4217 currency code
+  shape: '{"amount": 2500, "currency": "USD"}'
+  note: >-
+    Stated in the description of every price-bearing tool: "Prices in the response are integers
+    in the currency's ISO 4217 minor units... divide by 100 for two-decimal currencies such as
+    USD and EUR; zero-decimal currencies such as JPY are already whole units." This is an
+    explicit anti-footgun instruction aimed at agents quoting prices to buyers.
+
+identifiers:
+  format: Shopify global IDs
+  example_shape: 'gid://shopify/Checkout/{id}'
+  evidence: 'tools[get_checkout].inputSchema.properties.id.description: "The ID of the checkout to update. Format: ''gid://shopify/Checkout/abc123''"'
+
+buyer_context:
+  fields: [address_country, address_region, postal_code, language, currency, intent]
+  location: catalog.context
+  required: false
+  note: >-
+    llms.txt instructs agents to "Pass context.address_country and context.currency for accurate
+    pricing and availability." Platform signals (dev.ucp.buyer_ip, dev.ucp.user_agent) are a
+    separate catalog.signals object.
+
+request_tracing:
+  header: x-request-id
+  observed: true
+  evidence: 'Observed on a live POST to /api/ucp/mcp: x-request-id: f0e0dbf4-...-1787399760. A server-timing header additionally carries requestID, edge, country and processing duration.'
+  documented: false
+  note: The header is served but is not documented anywhere by the provider.
+
+versioning:
+  scheme: date-based protocol versions
+  current: '2026-04-08'
+  supported: ['2026-04-08', '2026-01-23']
+  negotiation: >-
+    Versions are declared in /.well-known/ucp under ucp.supported_versions, each mapping to a
+    version-pinned discovery document (e.g. /.well-known/ucp/2026-04-08). Several capabilities
+    additionally declare requires.protocol.min = 2026-04-08.
+  api_version_header: null
+  note: The version is the UCP protocol's, not a Glowbar API version. Glowbar publishes no versioning policy of its own.
+
+error_envelope:
+  format: JSON-RPC 2.0 error object
+  rfc9457: false
+  shape: '{"jsonrpc":"2.0","id":<id>,"error":{"code":<int>,"message":<string>,"data":{"code":<slug>,"content":<string>,"continue_url":<url>}}}'
+  http_status_on_error: 422 (observed)
+  catalog: errors/glowbar-problem-types.yml
+
+rate_limit_signaling:
+  documented: true
+  headers_observed: []
+  detail: rate-limits/glowbar-rate-limits.yml
+  note: >-
+    llms.txt states the MCP endpoint is rate-limited per IP with 429 backoff, but no
+    RateLimit-* or Retry-After header was present on any observed response.
+
+dry_run_mode:
+  supported: false
+  grade: na
+  note: >-
+    No tool accepts a dry-run, preview or simulate flag. The closest equivalent is structural
+    rather than a flag: create_checkout / update_checkout build and price a checkout — including
+    totals, discounts, taxes and shipping — without charging anything, so an agent can fully
+    rehearse a purchase and read the final amount before complete_checkout. That is a real
+    rehearsal path, but it is not a declared dry-run mode and is not scored as one.
+
+reversibility:
+  grade: verified
+  summary: >-
+    Every write in the tool set is reversible except one, the reversal operations are
+    first-class named tools, and the provider publishes an explicit window for the
+    post-purchase remedy.
+  surfaces:
+  - write_operation: create_cart
+    reversal: cancel_cart
+    reversal_type: tool
+    window: until the cart is converted to a checkout
+    window_stated: false
+    docs: https://glowbar.com/agents.md
+    note: cancel_cart is published in tools/list. No time limit is stated; the practical boundary is checkout creation.
+  - write_operation: update_cart
+    reversal: update_cart
+    reversal_type: tool
+    window: unbounded before checkout
+    window_stated: false
+    docs: https://glowbar.com/agents.md
+    note: Cart mutation is itself reversible — an agent can re-issue update_cart to undo a prior change.
+  - write_operation: create_checkout
+    reversal: cancel_checkout
+    reversal_type: tool
+    window: before complete_checkout
+    window_stated: true
+    docs: https://glowbar.com/agents.md
+    note: >-
+      cancel_checkout is published in tools/list and the store's documented agent flow places
+      completion last, so the reversal window is the whole of the checkout lifecycle up to the
+      buyer-approved payment step.
+  - write_operation: update_checkout
+    reversal: update_checkout
+    reversal_type: tool
+    window: before complete_checkout
+    window_stated: true
+    docs: https://glowbar.com/agents.md
+  - write_operation: complete_checkout
+    reversal: none-via-api
+    reversal_type: out-of-band
+    window: '21 days from purchase, unopened retail product only'
+    window_stated: true
+    docs: https://glowbar.com/policies/refund-policy
+    quote: 'We can accept unopened product for an exchange or store credit within 21 days of purchase.'
+    note: >-
+      This is the one irreversible API action. There is no refund, void or reverse tool; the only
+      remedy is the human returns process, it yields exchange or store credit rather than a
+      refund to the original tender, and it applies only to unopened retail product. An agent
+      must treat complete_checkout as final.
+    discrepancy: >-
+      The refund policy page states 21 days; the FAQ page (https://glowbar.com/pages/faqs) states
+      "within 14 days of purchase" for the same remedy. The two provider-published pages
+      disagree. The policy page is treated as authoritative here and both are recorded, because
+      an agent reading the FAQ would advise a buyer a week more conservatively than the policy
+      allows.
+  non_api_reversals:
+  - action: appointment booking
+    reversal: cancel or reschedule
+    window: at least 24 hours in advance
+    window_stated: true
+    penalty: '$30 late-cancellation fee; $60 for Double-Up appointments; automatic cancellation if 10+ minutes late'
+    docs: https://glowbar.com/pages/faqs
+    note: Booking is not on the API surface — it runs on a third-party platform at bookings.glowbar.com — but the window is recorded because it governs the provider's highest-value transaction.
+  - action: membership signup
+    reversal: cancel or pause
+    window: after a 4-month minimum commitment
+    window_stated: true
+    docs: https://glowbar.com/pages/membership
+  final_sale:
+  - facial services
+  - membership payments
+  - opened retail product
+  final_sale_quote: 'All facial services and membership payments are final sale.'
+  final_sale_docs: https://glowbar.com/pages/faqs
+
+agent_rules:
+  human_approval_required: true
+  scope: checkout completion / payment / order placement
+  quote: >-
+    "Checkouts are for humans. Do NOT complete checkout, payment, or order placement
+    automatically — no scripted form fills, browser automation, or end-to-end agent flows that
+    finalize payment without an explicit, contemporaneous human approval step."
+  source: https://glowbar.com/robots.txt
+  sanctioned_paths:
+  - https://glowbar.com/api/ucp/mcp
+  - https://shop.app/SKILL.md
+  note: >-
+    The provider publishes the rule in three places — robots.txt, agents.md and llms.txt — and
+    each time pairs the prohibition with the sanctioned alternative. This is an unusually
+    complete agent-access contract for a company with no developer program.
+
+cross_references:
+  errors: errors/glowbar-problem-types.yml
+  lifecycle: lifecycle/glowbar-lifecycle.yml
+  authentication: authentication/glowbar-authentication.yml
+  scopes: scopes/glowbar-scopes.yml
+  rate_limits: rate-limits/glowbar-rate-limits.yml
+  data_model: data-model/glowbar-data-model.yml
+  agentic_access: agentic-access/glowbar-agentic-access.yml

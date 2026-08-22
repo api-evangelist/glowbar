@@ -1,0 +1,86 @@
+generated: '2026-08-22'
+method: derived
+source: mcp/glowbar-mcp-tools.json + https://glowbar.com/agents.md + https://glowbar.com/llms.txt
+note: >-
+  Glowbar publishes NO OpenAPI, so there are no operationIds to bind to. What it does publish
+  — in agents.md and llms.txt — is a documented read-only HTTP surface (the Shopify storefront
+  JSON endpoints) alongside the 13-tool MCP surface. This crosswalk binds the MCP tools to
+  those documented HTTP paths instead of to operationIds, and records the divergence: the
+  entire cart, checkout and order lifecycle is MCP-only with no documented HTTP equivalent,
+  while collection/sitemap browsing is HTTP-only with no tool. Confidence is capped at medium
+  everywhere because the binding is by documented semantics, not by a shared contract.
+surfaces:
+  openapi: null
+  openapi_note: No OpenAPI, Swagger, GraphQL SDL, gRPC or WSDL contract is published on any Glowbar host.
+  graphql: null
+  mcp: https://glowbar.com/api/ucp/mcp
+  mcp_gated: false
+  mcp_note: tools/list is anonymous; tools/call requires a meta.ucp-agent.profile URI.
+  http_read: https://glowbar.com/agents.md
+  http_read_note: Read-only storefront JSON paths documented under "Read-Only Browsing (No Authentication Required)".
+crosswalk:
+- tool: search_catalog
+  category: catalog
+  rest:
+  - GET /search?q={query}&type=product
+  binding: documented-path
+  confidence: medium
+  note: agents.md documents the storefront search path; the MCP tool adds structured buyer context (currency, country) the HTML path does not accept.
+- tool: get_product
+  category: catalog
+  rest:
+  - GET /products/{handle}.json
+  binding: documented-path
+  confidence: medium
+  note: Both return a single product by identifier; the JSON path keys on handle, the tool keys on a UCP catalog identifier.
+- tool: lookup_catalog
+  category: catalog
+  rest:
+  - GET /collections/{handle}/products.json
+  - GET /products.json
+  binding: partial
+  confidence: low
+  note: >-
+    The tool looks up multiple products or variants by identifier; the closest documented HTTP
+    surface is bulk collection/product listing, which enumerates rather than looks up. Probed
+    /products.json (200, 30 products) and /collections/all/products.json (200) to confirm the
+    paths are live.
+mcp_only:
+- tool: create_cart
+  reason: No documented public HTTP cart-creation endpoint in agents.md; cart mutation is exposed only through UCP/MCP.
+- tool: get_cart
+  reason: No documented public HTTP cart read endpoint.
+- tool: update_cart
+  reason: No documented public HTTP cart mutation endpoint.
+- tool: cancel_cart
+  reason: No documented public HTTP cart cancellation endpoint.
+- tool: create_checkout
+  reason: Checkout lifecycle is exposed only via UCP/MCP; the HTML checkout is a human surface, and robots.txt explicitly forbids scripting it.
+- tool: get_checkout
+  reason: Checkout lifecycle is MCP-only.
+- tool: update_checkout
+  reason: Checkout lifecycle is MCP-only.
+- tool: complete_checkout
+  reason: Checkout lifecycle is MCP-only, and completion additionally requires contemporaneous human buyer approval.
+- tool: cancel_checkout
+  reason: Checkout lifecycle is MCP-only.
+- tool: get_order
+  reason: Order retrieval has no documented anonymous HTTP equivalent; buyer-scoped order data sits behind Shopify Customer Accounts OAuth.
+rest_only:
+- path: GET /collections/all
+  reason: Collection browsing has no MCP tool; catalog tools search or look up rather than enumerate collections.
+- path: GET /collections/{handle}
+  reason: No MCP tool exposes collection membership.
+- path: GET /sitemap.xml
+  reason: Crawl discovery surface with no tool equivalent.
+- path: GET /sitemap_agentic_discovery.xml
+  reason: Agent discovery surface with no tool equivalent.
+- path: GET /policies/{policy}
+  reason: Store policies (privacy, terms, refund) are HTML-only; no tool returns policy text.
+coverage:
+  mcp_tools: 13
+  bound_to_http: 3
+  mcp_only: 10
+  http_only: 5
+  bound_to_operationid: 0
+  binding_basis: documented-semantics

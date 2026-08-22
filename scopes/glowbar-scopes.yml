@@ -1,0 +1,33 @@
+generated: '2026-08-22'
+method: probed
+source: https://glowbar.com/.well-known/openid-configuration
+note: >-
+  Scopes read verbatim from the `scopes_supported` array of the OIDC discovery document served
+  by glowbar.com for Shopify Customer Accounts shop 44884033689. Glowbar publishes no scope
+  reference page of its own; descriptions below state what each scope grants according to the
+  discovery document and the observed protected resource, and are marked as such rather than
+  quoted from a Glowbar doc.
+authorization_server: https://shopify.com/authentication/44884033689
+protected_resource: https://glowbar.com
+flows:
+- type: authorization_code
+  pkce: S256
+  authorization_url: https://shopify.com/authentication/44884033689/oauth/authorize
+  token_url: https://shopify.com/authentication/44884033689/oauth/token
+scopes:
+- name: openid
+  description: Standard OpenID Connect scope; requests an ID token identifying the signed-in buyer.
+  source: scopes_supported
+- name: email
+  description: Releases the buyer's email address and email_verified claim.
+  source: scopes_supported
+- name: customer-account-api:full
+  description: Full access to the Shopify Customer Account API for the signed-in buyer — profile, addresses, and order history on the Glowbar store.
+  source: scopes_supported
+- name: customer-account-mcp-api:full
+  description: Full access to the buyer-scoped Customer Account MCP API, the authenticated counterpart to the anonymous storefront UCP/MCP endpoint.
+  source: scopes_supported
+scope_count: 4
+claims_supported: [iss, sub, aud, exp, iat, nonce, sid, email, email_verified]
+docs: null
+docs_note: No Glowbar-published scopes or permissions reference page exists; the discovery document is the only machine-readable source.

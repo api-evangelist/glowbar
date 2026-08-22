@@ -1,0 +1,76 @@
+generated: '2026-08-22'
+method: probed
+source: https://glowbar.com/.well-known/
+note: >-
+  Probed every canonical /.well-known/ path on the storefront host plus the UCP discovery
+  path named in the store's own agents.md. Four paths returned real documents; the rest 404.
+  The OAuth/OIDC documents are Shopify Customer Accounts, provisioned per-store (issuer
+  https://shopify.com/authentication/44884033689 is Glowbar's own shop id) and served from
+  Glowbar's host. The /.well-known/ucp merchant profile is store-specific: it names
+  merchant "Glowbar", merchant_origin glowbar.com, and the canonical shop
+  glowbar-concierge.myshopify.com.
+hosts:
+- host: glowbar.com
+  documents:
+  - path: /.well-known/ucp
+    status: 200
+    file: glowbar-ucp.json
+    content_type: application/json
+    description: UCP merchant profile — supported versions, dev.ucp.shopping service endpoints, capabilities and payment handlers.
+  - path: /.well-known/openid-configuration
+    status: 200
+    file: glowbar-openid-configuration.json
+    content_type: application/json
+    description: Shopify Customer Accounts OIDC discovery document for shop 44884033689.
+  - path: /.well-known/oauth-authorization-server
+    status: 200
+    file: glowbar-oauth-authorization-server.json
+    content_type: application/json
+    description: RFC 8414 authorization server metadata (identical body to the OIDC document).
+  - path: /.well-known/oauth-protected-resource
+    status: 200
+    file: glowbar-oauth-protected-resource.json
+    content_type: application/json
+    description: RFC 9728 protected resource metadata naming glowbar.com as the resource.
+  - path: /.well-known/security.txt
+    status: 404
+    file: null
+  - path: /.well-known/api-catalog
+    status: 404
+    file: null
+  - path: /.well-known/ai-plugin.json
+    status: 404
+    file: null
+  - path: /.well-known/agent-card.json
+    status: 404
+    file: null
+  - path: /.well-known/agent.json
+    status: 404
+    file: null
+  - path: /.well-known/dnt-policy.txt
+    status: 404
+    file: null
+- host: www.glowbar.com
+  documents:
+  - path: /.well-known/ucp
+    status: 200
+    file: glowbar-ucp.json
+    note: Same document as the apex host; www redirects to the apex.
+  - path: /.well-known/openid-configuration
+    status: 200
+    file: glowbar-openid-configuration.json
+  - path: /.well-known/security.txt
+    status: 404
+    file: null
+  - path: /.well-known/agent-card.json
+    status: 404
+    file: null
+- host: bookings.glowbar.com
+  documents:
+  - path: /.well-known/ucp
+    status: 404
+    file: null
+    note: Third-party booking platform (Boulevard); publishes no discovery documents.
+  - path: /.well-known/agent-card.json
+    status: 404
+    file: null

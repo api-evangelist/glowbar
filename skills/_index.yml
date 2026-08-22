@@ -1,0 +1,29 @@
+generated: '2026-08-22'
+method: generated
+source: mcp/glowbar-mcp-tools.json + https://glowbar.com/agents.md + https://glowbar.com/robots.txt
+note: >-
+  Grounded entirely in the 13 tool names and input schemas returned by a live, anonymous
+  tools/list against https://glowbar.com/api/ucp/mcp on 2026-08-22, plus the store's own
+  published agent rules and refund policy. Glowbar publishes no OpenAPI, so these skills are
+  bound to MCP tool names rather than operationIds. No operation, parameter, error code or policy
+  window below is invented — each is traceable to the saved artifacts or a cited URL. Glowbar
+  publishes no skills of its own; it recommends Shopify's cross-store Shop skill instead.
+skills:
+- name: glowbar-catalog-search
+  file: glowbar-catalog-search.md
+  description: Search and inspect the Glowbar product catalog with correct buyer context, cursor pagination and minor-unit price conversion.
+  api: Glowbar UCP Commerce MCP API
+  operations: [search_catalog, lookup_catalog, get_product]
+  consequence: read-only
+- name: glowbar-cart-and-checkout
+  file: glowbar-cart-and-checkout.md
+  description: Build a cart and drive a checkout to the point of payment, stopping at the mandatory contemporaneous human buyer-approval step.
+  api: Glowbar UCP Commerce MCP API
+  operations: [create_cart, update_cart, get_cart, cancel_cart, create_checkout, update_checkout, get_checkout, complete_checkout, cancel_checkout, get_order]
+  consequence: financial — requires human approval and an idempotency key
+provider_published_skills:
+- name: Shop skill
+  url: https://shop.app/SKILL.md
+  vendor: Shopify
+  first_party: false
+  note: Recommended by Glowbar's llms.txt, agents.md and robots.txt, but authored and hosted by Shopify for all Shopify stores, not by Glowbar.

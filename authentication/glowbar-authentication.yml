@@ -1,0 +1,80 @@
+generated: '2026-08-22'
+method: probed
+source: https://glowbar.com/.well-known/openid-configuration + https://glowbar.com/.well-known/oauth-protected-resource + live POST to https://glowbar.com/api/ucp/mcp
+docs: https://glowbar.com/agents.md
+note: >-
+  Glowbar publishes no OpenAPI, so this profile is built from machine-readable discovery
+  documents actually fetched from glowbar.com plus observed behaviour of the live MCP
+  endpoint. There are three distinct authentication postures on this provider and they are
+  not interchangeable.
+schemes:
+- id: anonymous_mcp_discovery
+  type: none
+  applies_to: MCP tools/list on https://glowbar.com/api/ucp/mcp
+  description: >-
+    Tool discovery is fully anonymous. A POST of {"jsonrpc":"2.0","id":1,"method":"tools/list"}
+    with no credentials returned HTTP 200 and 13 tools with complete input schemas on
+    2026-08-22.
+  evidence:
+    url: https://glowbar.com/api/ucp/mcp
+    http_status: 200
+    verified: '2026-08-22'
+- id: ucp_agent_profile
+  type: agent-profile-uri
+  applies_to: every MCP tools/call invocation
+  description: >-
+    Every tool's inputSchema requires a `meta.ucp-agent.profile` property — a URI identifying
+    the calling agent, which the store dereferences. This is an agent identity requirement
+    rather than a bearer credential: there is no API key to obtain and no registration form.
+    A tools/call without it fails closed.
+  required: true
+  location: JSON-RPC params.arguments.meta.ucp-agent.profile
+  failure:
+    http_status: 422
+    jsonrpc_error_code: -32001
+    error_code: invalid_profile_url
+    message: 'UCP discovery failed — Unable to fetch agent profile: Missing profile uri'
+  evidence:
+    url: https://glowbar.com/api/ucp/mcp
+    http_status: 422
+    verified: '2026-08-22'
+- id: shopify_customer_accounts
+  type: oauth2
+  sub_type: openIdConnect
+  applies_to: buyer-scoped data (customer account, saved addresses, order history)
+  description: >-
+    Shopify Customer Accounts, provisioned for Glowbar's shop id 44884033689. Authorization
+    code flow with PKCE (S256), refresh tokens, and a JWT-bearer grant. Bearer tokens are
+    presented in the Authorization header per the RFC 9728 protected-resource document.
+  issuer: https://shopify.com/authentication/44884033689
+  authorization_endpoint: https://shopify.com/authentication/44884033689/oauth/authorize
+  token_endpoint: https://shopify.com/authentication/44884033689/oauth/token
+  end_session_endpoint: https://shopify.com/authentication/44884033689/logout
+  jwks_uri: https://shopify.com/authentication/44884033689/.well-known/jwks.json
+  grant_types:
+  - authorization_code
+  - refresh_token
+  - urn:ietf:params:oauth:grant-type:jwt-bearer
+  response_types: [code]
+  pkce: [S256]
+  token_endpoint_auth_methods: [client_secret_basic, client_secret_post]
+  id_token_signing_alg: [RS256]
+  bearer_methods_supported: [header]
+  protected_resource: https://glowbar.com
+  scopes: scopes/glowbar-scopes.yml
+  provenance_note: >-
+    The authorization server is Shopify's, on shopify.com, not on a Glowbar host. It is
+    recorded here because the discovery documents are served from glowbar.com and the issuer
+    is scoped to Glowbar's shop. This is a platform-provided identity surface, not one
+    Glowbar operates.
+  evidence:
+    url: https://glowbar.com/.well-known/openid-configuration
+    http_status: 200
+    verified: '2026-08-22'
+not_present:
+  api_keys: No API key programme, developer registration, or key-issuance surface is published on any Glowbar host.
+  mutual_tls: Not advertised.
+  http_basic: Not advertised.
+  developer_program: >-
+    Glowbar publishes no developer portal, no API reference and no self-serve credentials.
+    The only machine surface is the platform-provided UCP/MCP endpoint above.

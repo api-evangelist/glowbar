@@ -1,0 +1,167 @@
+generated: '2026-08-22'
+method: probed
+source: https://glowbar.com/api/ucp/mcp
+note: >-
+  Glowbar's storefront runs on Shopify, and Shopify serves a Universal Commerce Protocol
+  (UCP) MCP endpoint from the merchant's own host. This is a real, live, anonymously
+  callable agent surface at https://glowbar.com/api/ucp/mcp: an unauthenticated
+  JSON-RPC 2.0 tools/list returned HTTP 200 with 13 tools, each carrying a complete
+  JSON Schema 2020-12 inputSchema. The full response is saved verbatim as
+  glowbar-mcp-tools.json. OWNERSHIP — the implementation is Shopify's, not Glowbar-authored
+  software, but the endpoint is served from glowbar.com, and the store's UCP profile is
+  Glowbar-specific: merchant name "Glowbar", merchant_origin glowbar.com, shop id
+  44884033689, canonical shop glowbar-concierge.myshopify.com. The tools act on Glowbar's
+  own catalog, carts and orders. It is recorded as Glowbar's agent surface with the platform
+  provenance stated, not as software Glowbar built.
+server:
+  name: Glowbar UCP Commerce MCP
+  protocol: Model Context Protocol over JSON-RPC 2.0
+  transport: streamable-http
+  implementation: Shopify (platform-provided UCP dev.ucp.shopping service)
+  ucp_version: '2026-04-08'
+  ucp_supported_versions:
+  - '2026-04-08'
+  - '2026-01-23'
+  status: live
+deployment:
+  mode: remote
+  endpoint: https://glowbar.com/api/ucp/mcp
+  canonical_endpoint: https://glowbar-concierge.myshopify.com/api/ucp/mcp
+  install: null
+  package: null
+  auth: none
+  auth_note: >-
+    tools/list requires no credentials. Individual tools/call invocations require a
+    meta.ucp-agent.profile URI (an agent profile URL the store fetches); calls without it
+    return HTTP 422 with JSON-RPC error -32001 invalid_profile_url. Buyer-authenticated
+    operations use Shopify Customer Accounts OAuth/OIDC (see authentication/ and scopes/).
+  verified: probed
+  verified_on: '2026-08-22'
+x-evidence:
+  fetched: '2026-08-22'
+  url: https://glowbar.com/api/ucp/mcp
+  method: POST
+  request: '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
+  http_status: 200
+  content_type: application/json; charset=utf-8
+  tool_count: 13
+  raw: mcp/glowbar-mcp-tools.json
+discovery:
+- url: https://glowbar.com/.well-known/ucp
+  http_status: 200
+  note: UCP merchant profile naming the MCP transport and endpoint.
+- url: https://glowbar.com/agents.md
+  http_status: 200
+- url: https://glowbar.com/llms.txt
+  http_status: 200
+- url: https://glowbar.com/robots.txt
+  http_status: 200
+capabilities:
+- id: dev.ucp.shopping.catalog.search
+  version: '2026-04-08'
+- id: dev.ucp.shopping.catalog.lookup
+  version: '2026-04-08'
+- id: dev.ucp.shopping.cart
+  version: '2026-04-08'
+- id: dev.ucp.shopping.checkout
+  version: '2026-04-08'
+- id: dev.ucp.shopping.fulfillment
+  version: '2026-04-08'
+  config:
+    allows_multi_destination_shipping: false
+    allows_method_combinations:
+    - - shipping
+- id: dev.ucp.shopping.discount
+  version: '2026-04-08'
+- id: dev.ucp.shopping.order
+  version: '2026-04-08'
+- id: dev.shopify.catalog
+  version: '2026-04-08'
+payment_handlers:
+- id: gpay
+  handler: com.google.pay
+  version: '2026-01-11'
+  card_networks: [VISA, MASTERCARD, AMEX, DISCOVER]
+- id: shopify.card
+  handler: dev.shopify.card
+  version: '2026-01-15'
+  card_brands: [visa, master, american_express, discover, diners_club]
+- id: shop_pay
+  handler: dev.shopify.shop_pay
+  version: '2026-04-08'
+tools:
+- name: search_catalog
+  category: catalog
+  description: Search for products from the online store, hosted on Shopify.
+  required: [meta, catalog]
+  consequence: read
+- name: lookup_catalog
+  category: catalog
+  description: Look up multiple products or variants by identifier.
+  required: [meta, catalog]
+  consequence: read
+- name: get_product
+  category: catalog
+  description: Retrieve complete product detail by identifier. Returns a singular product.
+  required: [meta, catalog]
+  consequence: read
+- name: get_cart
+  category: cart
+  description: Get the cart contents.
+  required: [meta, id]
+  consequence: read
+- name: create_cart
+  category: cart
+  description: Creates a new cart.
+  required: [meta, cart]
+  consequence: write
+- name: update_cart
+  category: cart
+  description: Perform updates to a cart.
+  required: [meta, cart, id]
+  consequence: write
+- name: cancel_cart
+  category: cart
+  description: Cancels a cart.
+  required: [meta, id]
+  consequence: write-reversal
+- name: get_checkout
+  category: checkout
+  description: Returns details about the checkout, including line items, totals, and any applicable discounts or taxes.
+  required: [meta, id]
+  consequence: read
+- name: create_checkout
+  category: checkout
+  description: Creates a checkout. Returns checkout details, including line items, totals, and any applicable discounts or taxes.
+  required: [meta, checkout]
+  consequence: write
+- name: update_checkout
+  category: checkout
+  description: Updates a checkout. Returns checkout details, including line items, totals, and any applicable discounts or taxes.
+  required: [meta, checkout, id]
+  consequence: write
+- name: complete_checkout
+  category: checkout
+  description: Completes a checkout and returns the checkout result, including order ID, Thank You Page URL, or any errors encountered.
+  required: [meta, id, checkout]
+  consequence: irreversible-financial
+  guardrail: >-
+    The store's published agent rules require explicit, contemporaneous human buyer approval
+    before payment. robots.txt states "Checkouts are for humans. Do NOT complete checkout,
+    payment, or order placement automatically."
+- name: cancel_checkout
+  category: checkout
+  description: Cancels a checkout.
+  required: [meta, id]
+  consequence: write-reversal
+- name: get_order
+  category: order
+  description: Get the details of an order.
+  required: [meta, id]
+  consequence: read
+coverage:
+  tool_count: 13
+  read: 6
+  write: 4
+  reversal: 2
+  irreversible: 1

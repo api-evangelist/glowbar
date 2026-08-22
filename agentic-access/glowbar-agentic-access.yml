@@ -1,0 +1,141 @@
+generated: '2026-08-22'
+method: generated
+source: mcp/glowbar-mcp-tools.json + https://glowbar.com/robots.txt + https://glowbar.com/agents.md + https://glowbar.com/llms.txt
+note: >-
+  A recommended x-agentic-access contract, classified per MCP tool. The tool names, required
+  parameters and consequence-bearing behaviours are read from the live tools/list response; the
+  escalation rules restate the provider's OWN published agent policy, which it states in three
+  places (robots.txt, agents.md, llms.txt). Nothing here is a policy API Evangelist invented on
+  Glowbar's behalf — where the provider is silent, the field says so.
+provider_stated_policy:
+  agent_access_permitted: true
+  sanctioned_interfaces:
+  - https://glowbar.com/api/ucp/mcp
+  - https://shop.app/SKILL.md
+  prohibited:
+  - Scripted form fills against the HTML checkout
+  - Browser automation that finalizes payment
+  - End-to-end agent flows that complete payment without contemporaneous human approval
+  human_approval_required_for: [payment, checkout completion, order placement]
+  quote: 'Checkouts are for humans. Do NOT complete checkout, payment, or order placement automatically.'
+  sources:
+  - url: https://glowbar.com/robots.txt
+    http_status: 200
+  - url: https://glowbar.com/agents.md
+    http_status: 200
+  - url: https://glowbar.com/llms.txt
+    http_status: 200
+  crawl_policy:
+    robots_allow: true
+    note: 'robots.txt Allow: / for User-agent: *. Public product, collection, page, blog, policy, cart and localized HTML is explicitly declared crawlable.'
+identity:
+  required: true
+  mechanism: meta.ucp-agent.profile — a dereferenceable agent profile URI
+  anonymous_discovery_permitted: true
+  note: Agents must identify themselves with a fetchable profile on every call, but need no credential to discover the tool set.
+operations:
+- tool: search_catalog
+  action_class: read
+  consequence: none
+  reversible: na
+  token: none
+  escalation: none
+- tool: lookup_catalog
+  action_class: read
+  consequence: none
+  reversible: na
+  token: none
+  escalation: none
+- tool: get_product
+  action_class: read
+  consequence: none
+  reversible: na
+  token: none
+  escalation: none
+- tool: get_cart
+  action_class: read
+  consequence: none
+  reversible: na
+  token: none
+  escalation: none
+- tool: get_checkout
+  action_class: read
+  consequence: none
+  reversible: na
+  token: none
+  escalation: none
+- tool: get_order
+  action_class: read
+  consequence: none
+  reversible: na
+  token: none
+  escalation: none
+  note: Buyer-scoped; anonymous callers can only read orders they created in-session.
+- tool: create_cart
+  action_class: write
+  consequence: low
+  reversible: true
+  reversal: cancel_cart
+  token: none
+  escalation: none
+  rationale: Creates no financial obligation and is undone by a published tool.
+- tool: update_cart
+  action_class: write
+  consequence: low
+  reversible: true
+  reversal: update_cart
+  token: none
+  escalation: none
+- tool: cancel_cart
+  action_class: write
+  consequence: low
+  reversible: false
+  token: none
+  escalation: none
+  rationale: Destructive but only of a draft basket; no buyer harm.
+- tool: create_checkout
+  action_class: write
+  consequence: medium
+  reversible: true
+  reversal: cancel_checkout
+  token: none
+  escalation: notify
+  rationale: Reserves nothing and charges nothing, but begins a purchase flow the buyer should be aware of.
+- tool: update_checkout
+  action_class: write
+  consequence: medium
+  reversible: true
+  reversal: update_checkout
+  token: none
+  escalation: notify
+  note: Carries the shipping address, so it moves buyer PII.
+- tool: cancel_checkout
+  action_class: write
+  consequence: low
+  reversible: false
+  token: none
+  escalation: none
+- tool: complete_checkout
+  action_class: write
+  consequence: high-financial
+  reversible: false
+  reversal: none-via-api
+  out_of_band_remedy: 'Exchange or store credit on unopened retail product within 21 days (https://glowbar.com/policies/refund-policy)'
+  token: meta.idempotency-key (required by schema)
+  escalation: human-approval-required
+  approval_type: explicit, contemporaneous buyer approval at the moment of payment
+  rationale: >-
+    The only operation that moves money and the only one with no API reversal. The provider
+    mandates human approval, the schema mandates an idempotency key, and the remedy afterwards
+    is a manual returns process yielding store credit rather than a refund. An agent must treat
+    this as a one-way door.
+  provider_stated: true
+summary:
+  tool_count: 13
+  read: 6
+  write_low: 4
+  write_medium: 2
+  write_high_financial: 1
+  requiring_human_approval: 1
+  requiring_idempotency_token: 1
+  irreversible: 1

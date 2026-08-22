@@ -1,0 +1,60 @@
+generated: '2026-08-22'
+method: probed
+source: https://glowbar.com/.well-known/ucp
+note: >-
+  Glowbar publishes no versioning policy, no deprecation policy, no SLA and no status page of
+  its own. The only lifecycle signal on any Glowbar host is the UCP protocol version negotiation
+  in the merchant profile, which is the platform's release train rather than a Glowbar
+  commitment. Recorded as an honest thin result; no StatusPage or Deprecation pointer is
+  emitted, because emitting one would credit Glowbar with a policy it does not publish.
+versioning:
+  scheme: date-based protocol version
+  current: '2026-04-08'
+  supported:
+  - version: '2026-04-08'
+    label: latest stable
+    discovery: https://glowbar.com/.well-known/ucp/2026-04-08
+    http_status: 200
+  - version: '2026-01-23'
+    discovery: https://glowbar.com/.well-known/ucp/2026-01-23
+  negotiation: Declared in ucp.supported_versions; several capabilities set requires.protocol.min = 2026-04-08.
+  owner: Universal Commerce Protocol / Shopify — not Glowbar.
+  policy_url: null
+deprecation:
+  policy_published: false
+  sunset_header: false
+  deprecation_header: false
+  rfc8594: false
+  deprecated_operations: []
+  note: >-
+    No deprecation policy exists. The only observable deprecation mechanism is that an older UCP
+    version (2026-01-23) remains listed as supported alongside the current one, which implies
+    overlap but states no removal date.
+status_page:
+  present: false
+  url: null
+  probed:
+  - url: https://status.glowbar.com/
+    result: does not resolve
+  note: >-
+    Glowbar operates no status page. The underlying platform publishes status.shopify.com, but
+    that is Shopify's page for the Shopify platform, not a Glowbar commitment, and is therefore
+    NOT recorded as a Glowbar status page.
+sla:
+  published: false
+  url: null
+support:
+  channel: https://glowbar.com/pages/faqs
+  developer_support: false
+  note: Consumer FAQ only. There is no developer support channel, forum, or contact address for the API surface.
+changelog:
+  published: false
+  url: null
+  note: No API or product changelog is published. /blogs/news is a consumer marketing blog, not a release log.
+maturity:
+  api_program: none
+  agent_surface: live
+  assessment: >-
+    Glowbar has no API program and no API lifecycle. It has a live agent surface it did not
+    build and does not version, inherited from its commerce platform. An integrator's real
+    dependency is the UCP release train, not Glowbar.

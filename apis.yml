@@ -1,18 +1,81 @@
 aid: glowbar
 name: Glowbar
-description: 'Glowbar is a company surfaced via the API Evangelist harvest backlog (source: secondary-market)
-  and added to the network as a stub for full-pipeline profiling.'
+description: 'Glowbar is a New York-founded skincare studio chain offering expert 30-minute
+  customized facials delivered by licensed estheticians across roughly 25 studios, sold
+  through a monthly membership ($65/month for one facial, $120/month for two) alongside an
+  $85 non-member walk-in price and a direct-to-consumer retail storefront of professional
+  skincare products. Glowbar is not a software vendor and publishes no developer program,
+  but its glowbar.com storefront runs on Shopify and therefore exposes a genuine, callable,
+  unauthenticated agent surface: an agents.md / llms.txt agent instruction document, a
+  Universal Commerce Protocol (UCP) merchant profile at /.well-known/ucp, and a live MCP
+  endpoint at /api/ucp/mcp that answers tools/list anonymously with 13 catalog, cart,
+  checkout and order tools carrying full JSON Schema 2020-12 input schemas. Appointment
+  booking itself runs on a third-party platform (Boulevard) at bookings.glowbar.com and
+  publishes no contract.'
+image: https://glowbar.com/cdn/shop/files/Face_your_skin._2.png?v=1681760540
 url: https://raw.githubusercontent.com/api-evangelist/glowbar/refs/heads/main/apis.yml
 x-type: company
 x-source: harvest:secondary-market
-x-tier: stub
-x-tier-reason: harvest
 specificationVersion: '0.20'
 created: '2026-08-22'
 modified: '2026-08-22'
 tags:
 - Company
-apis: []
+- Skincare
+- Beauty
+- Retail
+- Commerce
+- Ecommerce
+- Consumer Services
+- Shopify
+- Agentic Commerce
+- Universal Commerce Protocol
+- MCP
+- Memberships
+apis:
+- name: Glowbar UCP Commerce MCP API
+  description: 'The agent-facing commerce interface for the Glowbar online store. A Model
+    Context Protocol (MCP) endpoint implementing the Universal Commerce Protocol (UCP)
+    dev.ucp.shopping service, version 2026-04-08. Answers tools/list anonymously over
+    JSON-RPC 2.0 with 13 tools spanning catalog search and lookup, cart lifecycle,
+    checkout lifecycle and order retrieval, each carrying a full JSON Schema 2020-12
+    inputSchema. Checkout completion requires explicit, contemporaneous human buyer
+    approval per the store''s published agent rules. Implemented by the Shopify platform
+    and served from Glowbar''s own host.'
+  humanURL: https://glowbar.com/agents.md
+  baseURL: https://glowbar.com/api/ucp/mcp
+  tags:
+  - Commerce
+  - Catalog
+  - Cart
+  - Checkout
+  - Orders
+  - MCP
+  - UCP
+  - Agentic Commerce
+  properties:
+  - type: MCPServer
+    url: mcp/glowbar-mcp.yml
+  - type: ToolCrosswalk
+    url: mcp/glowbar-tool-crosswalk.yml
+  - type: Documentation
+    url: https://glowbar.com/agents.md
+  - type: Authentication
+    url: authentication/glowbar-authentication.yml
+  - type: OAuthScopes
+    url: scopes/glowbar-scopes.yml
+  - type: ErrorCatalog
+    url: errors/glowbar-problem-types.yml
+  - type: RateLimits
+    url: rate-limits/glowbar-rate-limits.yml
+  - type: Conventions
+    url: conventions/glowbar-conventions.yml
+  - type: Idempotency
+    url: conventions/glowbar-conventions.yml
+  - type: DataModel
+    url: data-model/glowbar-data-model.yml
+  - type: AgenticAccess
+    url: agentic-access/glowbar-agentic-access.yml
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
@@ -20,4 +83,37 @@ maintainers:
   email: info@apis.io
 common:
 - type: Website
-  url: https://www.nasdaqprivatemarket.com/
+  url: https://glowbar.com/
+- type: LLMsTxt
+  url: llms/glowbar-llms.txt
+- type: WellKnown
+  url: well-known/glowbar-well-known.yml
+- type: Conformance
+  url: conformance/glowbar-conformance.yml
+- type: Lifecycle
+  url: lifecycle/glowbar-lifecycle.yml
+- type: Packages
+  url: packages/glowbar-packages.yml
+- type: Plans
+  url: plans/glowbar-plans-pricing.yml
+- type: AgentSkill
+  url: skills/_index.yml
+- type: DomainSecurity
+  url: security/glowbar-domain-security.yml
+- type: Blog
+  url: https://glowbar.com/blogs/news
+- type: Support
+  url: https://glowbar.com/pages/faqs
+- type: Pricing
+  url: https://glowbar.com/pages/membership
+- type: SignUp
+  url: https://glowbar.com/account/login
+- type: TermsOfService
+  url: https://glowbar.com/policies/terms-of-service
+- type: PrivacyPolicy
+  url: https://glowbar.com/policies/privacy-policy
+x-enrichment:
+  date: '2026-08-22'
+  status: enriched
+  artifacts_added: 26
+  pass: local-v1
