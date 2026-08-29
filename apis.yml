@@ -12,6 +12,17 @@ description: 'Glowbar is a New York-founded skincare studio chain offering exper
   checkout and order tools carrying full JSON Schema 2020-12 input schemas. Appointment
   booking itself runs on a third-party platform (Boulevard) at bookings.glowbar.com and
   publishes no contract.'
+deliveryModel:
+  model: saas
+  open_source: false
+  commercial: true
+  callable_host: false
+  label: Hosted service · you call their endpoint
+  confidence: medium
+  source:
+  - pricing
+  generated: '2026-08-28'
+  method: derived
 image: https://glowbar.com/cdn/shop/files/Face_your_skin._2.png?v=1681760540
 url: https://raw.githubusercontent.com/api-evangelist/glowbar/refs/heads/main/apis.yml
 x-type: company
