@@ -36,6 +36,19 @@ tags:
 - Beauty
 - Retail
 - Commerce
+- E-Commerce
+- Consumer Services
+- Shopify
+- Agentic Commerce
+- Universal Commerce Protocol
+- MCP
+- Memberships
+tags_raw:
+- Company
+- Skincare
+- Beauty
+- Retail
+- Commerce
 - Ecommerce
 - Consumer Services
 - Shopify
@@ -56,6 +69,15 @@ apis:
   humanURL: https://glowbar.com/agents.md
   baseURL: https://glowbar.com/api/ucp/mcp
   tags:
+  - Commerce
+  - Catalog
+  - Cart
+  - Checkout
+  - Order
+  - MCP
+  - UCP
+  - Agentic Commerce
+  tags_raw:
   - Commerce
   - Catalog
   - Cart
