@@ -57,7 +57,7 @@ tags:
 - Agentic Commerce
 - Universal Commerce Protocol
 - MCP
-- Memberships
+- Membership
 tags_raw:
 - Company
 - Skincare
@@ -90,7 +90,7 @@ apis:
   - Checkout
   - Order
   - MCP
-  - UCP
+  - Universal Commerce Protocol
   - Agentic Commerce
   tags_raw:
   - Commerce
